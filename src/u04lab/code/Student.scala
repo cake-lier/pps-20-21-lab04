@@ -1,12 +1,13 @@
 package u04lab.code
 
-import Lists._
-import u04lab.code.Lists.List.Cons // import custom List type (not the one in Scala stdlib)
+import u04lab.code.List.contains
+import u04lab.code.Lists.List // import custom List type (not the one in Scala stdlib)
+import u04lab.code.Lists.List.{Cons, filter, map, nil}
 
 trait Student {
   def name: String
   def year: Int
-  def enrolling(course: Course): Unit // the student participates to a Course
+  def enrolling(courses: Course*): Unit // the student participates to a Course
   def courses: List[String] // names of course the student participates to
   def hasTeacher(teacher: String): Boolean // is the student participating to a course of this teacher?
 }
@@ -17,11 +18,27 @@ trait Course {
 }
 
 object Student {
-  def apply(name: String, year: Int = 2017): Student = ???
+  def apply(name: String, year: Int = 2017): Student = StudentImpl(name, year)
+
+  private case class StudentImpl(override val name: String, override val year: Int) extends Student {
+    private var _courses: List[Course] = nil
+
+    override def enrolling(courses: Course*): Unit = courses.foreach(c => _courses = Cons(c, _courses))
+
+    override def courses: List[String] = map(_courses)(c => c.name)
+
+    override def hasTeacher(teacher: String): Boolean = contains(map(_courses)(c => c.teacher))(teacher)
+  }
 }
 
 object Course {
-  def apply(name: String, teacher: String): Course = ???
+  def apply(name: String, teacher: String): Course = CourseImpl(name, teacher)
+
+  private case class CourseImpl(override val name: String, override val teacher: String) extends Course
+}
+
+object List {
+  def contains[A](l: List[A])(e: A): Boolean = filter(l)(v => v == e) != nil
 }
 
 object Try extends App {
@@ -40,12 +57,3 @@ object Try extends App {
   println(s1.courses, s2.courses, s3.courses) // (Cons(PCD,Cons(PPS,Nil())),Cons(PPS,Nil()),Cons(SDR,Cons(PCD,Cons(PPS,Nil()))))
   println(s1.hasTeacher("Ricci")) // true
 }
-
-/** Hints:
-  * - simply implement Course, e.g. with a case class
-  * - implement Student with a StudentImpl keeping a private Set of courses
-  * - try to implement in StudentImpl method courses with map
-  * - try to implement in StudentImpl method hasTeacher with map and find
-  * - check that the two println above work correctly
-  * - refactor the code so that method enrolling accepts a variable argument Course*
-  */
