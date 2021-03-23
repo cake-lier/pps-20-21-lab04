@@ -1,8 +1,8 @@
 package u04lab.code
 
 import u04lab.code.List.contains
-import u04lab.code.Lists.List // import custom List type (not the one in Scala stdlib)
-import u04lab.code.Lists.List.{Cons, filter, map, nil}
+import u04lab.code.Lists.List
+import u04lab.code.Lists.List.{Cons, append, filter, map, nil}
 
 trait Student {
   def name: String
@@ -23,11 +23,11 @@ object Student {
   private case class StudentImpl(override val name: String, override val year: Int) extends Student {
     private var _courses: List[Course] = nil
 
-    override def enrolling(courses: Course*): Unit = courses.foreach(c => _courses = Cons(c, _courses))
+    override def enrolling(courses: Course*): Unit = _courses = append(courses.foldRight(nil[Course])(Cons[Course]), _courses)
 
-    override def courses: List[String] = map(_courses)(c => c.name)
+    override def courses: List[String] = map(_courses)(_.name)
 
-    override def hasTeacher(teacher: String): Boolean = contains(map(_courses)(c => c.teacher))(teacher)
+    override def hasTeacher(teacher: String): Boolean = contains(map(_courses)(_.teacher))(teacher)
   }
 }
 
@@ -38,15 +38,15 @@ object Course {
 }
 
 object List {
-  def contains[A](l: List[A])(e: A): Boolean = filter(l)(v => v == e) != nil
+  def contains[A](l: List[A])(e: A): Boolean = filter(l)(e.==) != nil
 }
 
 object Try extends App {
-  val cPPS = Course("PPS","Viroli")
-  val cPCD = Course("PCD","Ricci")
-  val cSDR = Course("SDR","D'Angelo")
-  val s1 = Student("mario",2015)
-  val s2 = Student("gino",2016)
+  val cPPS = Course("PPS", "Viroli")
+  val cPCD = Course("PCD", "Ricci")
+  val cSDR = Course("SDR", "D'Angelo")
+  val s1 = Student("mario", 2015)
+  val s2 = Student("gino", 2016)
   val s3 = Student("rino") //defaults to 2017
   s1.enrolling(cPPS)
   s1.enrolling(cPCD)

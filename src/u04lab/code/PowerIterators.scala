@@ -1,6 +1,6 @@
 package u04lab.code
 
-import u04lab.code.Lists.List.{append, nil, reverse}
+import u04lab.code.Lists.List.{append, foldRight, nil, reverse}
 import u04lab.code.Lists._
 import u04lab.code.Optionals.Option
 import u04lab.code.Optionals.Option.{None, Some}
@@ -22,17 +22,14 @@ trait PowerIteratorsFactory {
 }
 
 class PowerIteratorsFactoryImpl extends PowerIteratorsFactory {
-  private def toStream[A](l: List[A]): Stream[A] = l match {
-    case List.Cons(h, t) => cons(h, toStream(t))
-    case _ => empty()
-  }
+  private def toStream[A](l: List[A]): Stream[A] = foldRight(l)(empty[A]())(cons(_, _))
 
   private case class PowerIteratorImpl[A](private var s: Stream[A]) extends PowerIterator[A] {
     private var pastList: List[A] = nil
 
     override def next(): Option[A] = s match {
       case Stream.Cons(h, t) =>
-        lazy val head = h()
+        val head = h()
         pastList = append(pastList, List.Cons(head, List.nil))
         s = t()
         Some(head)
