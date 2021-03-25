@@ -23,7 +23,8 @@ object Student {
   private case class StudentImpl(override val name: String, override val year: Int) extends Student {
     private var _courses: List[Course] = nil
 
-    override def enrolling(courses: Course*): Unit = _courses = append(courses.foldRight(nil[Course])(Cons[Course]), _courses)
+    override def enrolling(courses: Course*): Unit =
+      _courses = append(courses.foldLeft(nil[Course])((l, c) => Cons(c, l)), _courses)
 
     override def courses: List[String] = map(_courses)(_.name)
 
